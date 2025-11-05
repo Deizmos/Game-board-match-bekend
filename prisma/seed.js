@@ -79,7 +79,26 @@ async function main() {
   // Координаты: Москва (55.7558, 37.6173), Санкт-Петербург (59.9343, 30.3351)
   const user1 = await prisma.user.upsert({
     where: { email: 'alex@example.com' },
-    update: {},
+    update: {
+      profile: {
+        upsert: {
+          create: {
+            bio: 'Люблю стратегические игры и карточные игры',
+            age: 28,
+            city: 'Москва',
+            latitude: 55.7558,  // Координаты центра Москвы
+            longitude: 37.6173
+          },
+          update: {
+            bio: 'Люблю стратегические игры и карточные игры',
+            age: 28,
+            city: 'Москва',
+            latitude: 55.7558,  // Координаты центра Москвы
+            longitude: 37.6173
+          }
+        }
+      }
+    },
     create: {
       email: 'alex@example.com',
       password: hashedPassword,
@@ -98,7 +117,26 @@ async function main() {
 
   const user2 = await prisma.user.upsert({
     where: { email: 'maria@example.com' },
-    update: {},
+    update: {
+      profile: {
+        upsert: {
+          create: {
+            bio: 'Обожаю настольные игры, особенно социальные',
+            age: 25,
+            city: 'Санкт-Петербург',
+            latitude: 59.9343,  // Координаты центра Санкт-Петербурга
+            longitude: 30.3351
+          },
+          update: {
+            bio: 'Обожаю настольные игры, особенно социальные',
+            age: 25,
+            city: 'Санкт-Петербург',
+            latitude: 59.9343,  // Координаты центра Санкт-Петербурга
+            longitude: 30.3351
+          }
+        }
+      }
+    },
     create: {
       email: 'maria@example.com',
       password: hashedPassword,
@@ -117,7 +155,26 @@ async function main() {
 
   const user3 = await prisma.user.upsert({
     where: { email: 'dmitry@example.com' },
-    update: {},
+    update: {
+      profile: {
+        upsert: {
+          create: {
+            bio: 'Новичок в настольных играх, ищу компанию',
+            age: 30,
+            city: 'Москва',
+            latitude: 55.7520,  // Координаты другой части Москвы (для теста расстояния)
+            longitude: 37.6156
+          },
+          update: {
+            bio: 'Новичок в настольных играх, ищу компанию',
+            age: 30,
+            city: 'Москва',
+            latitude: 55.7520,  // Координаты другой части Москвы (для теста расстояния)
+            longitude: 37.6156
+          }
+        }
+      }
+    },
     create: {
       email: 'dmitry@example.com',
       password: hashedPassword,
