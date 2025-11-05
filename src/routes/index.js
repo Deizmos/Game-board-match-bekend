@@ -1,4 +1,5 @@
 import express from 'express';
+import authRoutes from './auth.routes.js';
 import gameRoutes from './game.routes.js';
 import userRoutes from './user.routes.js';
 import matchRoutes from './match.routes.js';
@@ -14,6 +15,7 @@ router.get('/', (req, res) => {
     message: 'Game Board Match API',
     version: '1.0.0',
     endpoints: {
+      auth: '/api/auth',
       games: '/api/games',
       users: '/api/users',
       matches: '/api/matches',
@@ -25,6 +27,7 @@ router.get('/', (req, res) => {
 });
 
 // Routes
+router.use('/auth', authRoutes);
 router.use('/games', gameRoutes);
 router.use('/users', userRoutes);
 router.use('/matches', matchRoutes);

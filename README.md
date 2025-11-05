@@ -31,6 +31,12 @@ CORS_ORIGIN=http://localhost:3000
 
 # Database Configuration
 DATABASE_URL="postgresql://user:password@localhost:5432/game_board_match?schema=public"
+
+# JWT Configuration
+JWT_SECRET="your-super-secret-jwt-key-change-in-production"
+JWT_REFRESH_SECRET="your-super-secret-refresh-key-change-in-production"
+JWT_ACCESS_EXPIRES_IN="15m"
+JWT_REFRESH_EXPIRES_IN="7d"
 ```
 
 3. Сгенерируйте Prisma Client:
@@ -114,6 +120,13 @@ npm start
 - `GET /api/geolocation/:userId/radius?radius=10&gameIds=1,2` - Найти пользователей в радиусе (км)
 - `GET /api/geolocation/:userId/nearest?limit=10&gameIds=1,2` - Найти ближайших пользователей
 - `GET /api/geolocation/distance/:userId1/:userId2` - Получить расстояние между пользователями
+
+### Auth (Аутентификация)
+- `POST /api/auth/register` - Регистрация пользователя
+- `POST /api/auth/login` - Вход пользователя
+- `POST /api/auth/refresh` - Обновление токенов
+- `POST /api/auth/logout` - Выход пользователя
+- `GET /api/auth/me` - Получить текущего пользователя (требуется авторизация)
 
 ## 📝 Примеры запросов
 
@@ -221,6 +234,47 @@ curl "http://localhost:3000/api/geolocation/1/nearest?limit=5"
 curl "http://localhost:3000/api/geolocation/distance/1/2"
 ```
 
+### Регистрация пользователя
+```bash
+curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "password123",
+    "name": "Иван",
+    "profile": {
+      "bio": "Люблю настольные игры",
+      "age": 25,
+      "city": "Москва"
+    }
+  }'
+```
+
+### Вход пользователя
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "password123"
+  }'
+```
+
+### Обновление токенов
+```bash
+curl -X POST http://localhost:3000/api/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refreshToken": "your-refresh-token-here"
+  }'
+```
+
+### Получить текущего пользователя (с авторизацией)
+```bash
+curl -X GET http://localhost:3000/api/auth/me \
+  -H "Authorization: Bearer your-access-token-here"
+```
+
 ## 🏗️ Структура проекта
 
 ```
@@ -230,25 +284,32 @@ src/
 ├── db/
 │   └── prisma.js             # Prisma Client настройка
 ├── controllers/              # Контроллеры (обработчики запросов)
+│   ├── auth.controller.js
 │   ├── game.controller.js
 │   ├── user.controller.js
 │   ├── match.controller.js
 │   ├── like.controller.js
-│   └── message.controller.js
+│   ├── message.controller.js
+│   └── geolocation.controller.js
 ├── services/                 # Бизнес-логика
+│   ├── auth.service.js
 │   ├── game.service.js
 │   ├── user.service.js
 │   ├── match.service.js
 │   ├── like.service.js
-│   └── message.service.js
+│   ├── message.service.js
+│   └── geolocation.service.js
 ├── routes/                   # Маршруты API
 │   ├── index.js
+│   ├── auth.routes.js
 │   ├── game.routes.js
 │   ├── user.routes.js
 │   ├── match.routes.js
 │   ├── like.routes.js
-│   └── message.routes.js
+│   ├── message.routes.js
+│   └── geolocation.routes.js
 └── middleware/               # Middleware функции
+    ├── auth.middleware.js
     ├── errorHandler.js
     └── validation.js
 prisma/

@@ -200,3 +200,17 @@ export const validateGeolocation = [
   handleValidationErrors
 ];
 
+/**
+ * Валидация входа
+ */
+export const validateLogin = [
+  body('email')
+    .isEmail()
+    .withMessage('Некорректный email адрес')
+    .normalizeEmail(),
+  body('password')
+    .notEmpty()
+    .withMessage('Пароль обязателен'),
+  handleValidationErrors
+];
+

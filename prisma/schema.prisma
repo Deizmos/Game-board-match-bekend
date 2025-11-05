@@ -28,6 +28,7 @@ model User {
   receivedMessages Message[]  @relation("MessageReceiver")
   likes            Like[]     @relation("LikeSender")
   likedBy          Like[]     @relation("LikeReceiver")
+  refreshTokens    RefreshToken[]
 
   @@map("users")
 }
@@ -148,5 +149,22 @@ model Message {
   receiver User @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@map("messages")
+}
+
+// Refresh токены для JWT аутентификации
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique @db.VarChar(500)
+  isActive  Boolean  @default(true)
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+
+  // Связи
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
 }
 
