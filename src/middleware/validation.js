@@ -187,3 +187,16 @@ export const validateMessage = [
   handleValidationErrors
 ];
 
+/**
+ * Валидация геолокации
+ */
+export const validateGeolocation = [
+  body('latitude')
+    .isFloat({ min: -90, max: 90 })
+    .withMessage('Широта должна быть числом от -90 до 90'),
+  body('longitude')
+    .isFloat({ min: -180, max: 180 })
+    .withMessage('Долгота должна быть числом от -180 до 180'),
+  handleValidationErrors
+];
+

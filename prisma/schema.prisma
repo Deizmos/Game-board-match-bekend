@@ -40,6 +40,8 @@ model Profile {
   age         Int?
   city        String?  @db.VarChar(100)
   photo       String?  @db.VarChar(500)
+  latitude    Float?   // Широта (геолокация)
+  longitude   Float?  // Долгота (геолокация)
   preferences Json?    // Дополнительные настройки профиля
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

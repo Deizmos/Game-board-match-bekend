@@ -4,6 +4,7 @@ import userRoutes from './user.routes.js';
 import matchRoutes from './match.routes.js';
 import likeRoutes from './like.routes.js';
 import messageRoutes from './message.routes.js';
+import geolocationRoutes from './geolocation.routes.js';
 
 const router = express.Router();
 
@@ -17,7 +18,8 @@ router.get('/', (req, res) => {
       users: '/api/users',
       matches: '/api/matches',
       likes: '/api/likes',
-      messages: '/api/messages'
+      messages: '/api/messages',
+      geolocation: '/api/geolocation'
     }
   });
 });
@@ -28,6 +30,7 @@ router.use('/users', userRoutes);
 router.use('/matches', matchRoutes);
 router.use('/likes', likeRoutes);
 router.use('/messages', messageRoutes);
+router.use('/geolocation', geolocationRoutes);
 
 export default router;
 

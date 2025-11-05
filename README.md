@@ -108,6 +108,13 @@ npm start
 - `POST /api/messages` - Отправить сообщение
 - `PUT /api/messages/read` - Отметить сообщения как прочитанные
 
+### Geolocation (Геолокация)
+- `PUT /api/geolocation/:userId` - Обновить геолокацию пользователя
+- `GET /api/geolocation/:userId` - Получить геолокацию пользователя
+- `GET /api/geolocation/:userId/radius?radius=10&gameIds=1,2` - Найти пользователей в радиусе (км)
+- `GET /api/geolocation/:userId/nearest?limit=10&gameIds=1,2` - Найти ближайших пользователей
+- `GET /api/geolocation/distance/:userId1/:userId2` - Получить расстояние между пользователями
+
 ## 📝 Примеры запросов
 
 ### Создать пользователя
@@ -187,6 +194,31 @@ curl -X POST http://localhost:3000/api/messages \
     "receiverId": 2,
     "content": "Привет! Хочешь сыграть?"
   }'
+```
+
+### Обновить геолокацию пользователя
+```bash
+curl -X PUT http://localhost:3000/api/geolocation/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "latitude": 55.7558,
+    "longitude": 37.6173
+  }'
+```
+
+### Найти пользователей в радиусе (10 км)
+```bash
+curl "http://localhost:3000/api/geolocation/1/radius?radius=10&gameIds=1,2"
+```
+
+### Найти ближайших пользователей
+```bash
+curl "http://localhost:3000/api/geolocation/1/nearest?limit=5"
+```
+
+### Получить расстояние между пользователями
+```bash
+curl "http://localhost:3000/api/geolocation/distance/1/2"
 ```
 
 ## 🏗️ Структура проекта
