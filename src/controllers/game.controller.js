@@ -1,11 +1,46 @@
 import { GameService } from '../services/game.service.js';
+import prisma from '../db/prisma.js';
 
 /**
  * Получить все игры
  */
 export const getGames = async (req, res, next) => {
   try {
-    const games = await GameService.getAllGames();
+    const skip = parseInt(req.query.skip, 10) || 0;
+    const take = parseInt(req.query.take, 10) || 50;
+    
+    const games = await GameService.getAllGames(skip, take);
+    
+    res.json({
+      success: true,
+      data: games,
+      count: games.length,
+      pagination: {
+        skip,
+        take
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Поиск игр
+ */
+export const searchGames = async (req, res, next) => {
+  try {
+    const { query, category } = req.query;
+    
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Необходимо указать параметр query' }
+      });
+    }
+
+    const games = await GameService.searchGames(query, category);
+
     res.json({
       success: true,
       data: games,

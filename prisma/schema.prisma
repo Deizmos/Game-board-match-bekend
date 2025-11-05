@@ -1,0 +1,150 @@
+// Prisma Schema для приложения поиска друзей в настольных играх
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Модель пользователя
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.VarChar(255)
+  password  String
+  name      String?  @db.VarChar(255)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Связи
+  profile   Profile?
+  userGames UserGame[]
+  sentMatches     Match[]     @relation("MatchSender")
+  receivedMatches Match[]     @relation("MatchReceiver")
+  sentMessages     Message[]  @relation("MessageSender")
+  receivedMessages Message[]  @relation("MessageReceiver")
+  likes            Like[]     @relation("LikeSender")
+  likedBy          Like[]     @relation("LikeReceiver")
+
+  @@map("users")
+}
+
+// Профиль пользователя
+model Profile {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
+  bio         String?  @db.Text
+  age         Int?
+  city        String?  @db.VarChar(100)
+  photo       String?  @db.VarChar(500)
+  preferences Json?    // Дополнительные настройки профиля
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Связи
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+// Настольные игры
+model Game {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  minPlayers  Int?
+  maxPlayers  Int?
+  duration    Int?     // Продолжительность в минутах
+  category    String?  @db.VarChar(100)
+  image       String?  @db.VarChar(500)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Связи
+  userGames UserGame[]
+
+  @@map("games")
+}
+
+// Связь пользователя с играми (какие игры он любит/играет)
+model UserGame {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  gameId      Int
+  skillLevel  String?  @db.VarChar(50) // beginner, intermediate, advanced, expert
+  isFavorite  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  // Связи
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])
+  @@map("user_games")
+}
+
+// Матчи между пользователями (взаимный интерес)
+enum MatchStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  BLOCKED
+}
+
+model Match {
+  id          Int         @id @default(autoincrement())
+  senderId    Int
+  receiverId  Int
+  status      MatchStatus @default(PENDING)
+  message     String?     @db.Text
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Связи
+  sender   User @relation("MatchSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("MatchReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@map("matches")
+}
+
+// Лайки (симпатии)
+enum LikeStatus {
+  LIKE
+  DISLIKE
+}
+
+model Like {
+  id          Int       @id @default(autoincrement())
+  senderId    Int
+  receiverId  Int
+  status      LikeStatus @default(LIKE)
+  createdAt   DateTime  @default(now())
+
+  // Связи
+  sender   User @relation("LikeSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("LikeReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@map("likes")
+}
+
+// Сообщения между пользователями
+model Message {
+  id          Int      @id @default(autoincrement())
+  senderId    Int
+  receiverId Int
+  content     String   @db.Text
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  // Связи
+  sender   User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+

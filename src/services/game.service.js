@@ -1,75 +1,140 @@
-// Временное хранилище в памяти (в будущем можно заменить на БД)
-let games = [];
-let nextId = 1;
+import prisma from '../db/prisma.js';
 
 /**
- * Сервис для работы с играми
+ * Сервис для работы с настольными играми
  */
 export class GameService {
   /**
    * Получить все игры
    */
-  static async getAllGames() {
-    return games;
+  static async getAllGames(skip = 0, take = 50) {
+    return prisma.game.findMany({
+      skip,
+      take,
+      orderBy: {
+        name: 'asc'
+      }
+    });
   }
 
   /**
    * Получить игру по ID
    */
   static async getGameById(id) {
-    const gameId = parseInt(id, 10);
-    return games.find(game => game.id === gameId) || null;
+    return prisma.game.findUnique({
+      where: { id: parseInt(id, 10) },
+      include: {
+        userGames: {
+          include: {
+            user: {
+              include: {
+                profile: true
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Поиск игр по названию или категории
+   */
+  static async searchGames(query, category) {
+    const where = {
+      OR: [
+        { name: { contains: query, mode: 'insensitive' } },
+        { description: { contains: query, mode: 'insensitive' } }
+      ],
+      ...(category && { category })
+    };
+
+    return prisma.game.findMany({
+      where,
+      orderBy: {
+        name: 'asc'
+      }
+    });
   }
 
   /**
    * Создать новую игру
    */
   static async createGame(gameData) {
-    const newGame = {
-      id: nextId++,
-      ...gameData,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    
-    games.push(newGame);
-    return newGame;
+    return prisma.game.create({
+      data: gameData
+    });
   }
 
   /**
    * Обновить игру
    */
   static async updateGame(id, gameData) {
-    const gameId = parseInt(id, 10);
-    const gameIndex = games.findIndex(game => game.id === gameId);
-
-    if (gameIndex === -1) {
-      return null;
-    }
-
-    games[gameIndex] = {
-      ...games[gameIndex],
-      ...gameData,
-      id: gameId,
-      updatedAt: new Date().toISOString()
-    };
-
-    return games[gameIndex];
+    return prisma.game.update({
+      where: { id: parseInt(id, 10) },
+      data: gameData
+    });
   }
 
   /**
    * Удалить игру
    */
   static async deleteGame(id) {
-    const gameId = parseInt(id, 10);
-    const gameIndex = games.findIndex(game => game.id === gameId);
+    return prisma.game.delete({
+      where: { id: parseInt(id, 10) }
+    });
+  }
 
-    if (gameIndex === -1) {
-      return false;
-    }
+  /**
+   * Добавить игру пользователю
+   */
+  static async addGameToUser(userId, gameId, skillLevel, isFavorite) {
+    return prisma.userGame.create({
+      data: {
+        userId: parseInt(userId, 10),
+        gameId: parseInt(gameId, 10),
+        skillLevel,
+        isFavorite: isFavorite || false
+      },
+      include: {
+        game: true,
+        user: {
+          include: {
+            profile: true
+          }
+        }
+      }
+    });
+  }
 
-    games.splice(gameIndex, 1);
-    return true;
+  /**
+   * Удалить игру у пользователя
+   */
+  static async removeGameFromUser(userId, gameId) {
+    return prisma.userGame.delete({
+      where: {
+        userId_gameId: {
+          userId: parseInt(userId, 10),
+          gameId: parseInt(gameId, 10)
+        }
+      }
+    });
+  }
+
+  /**
+   * Получить игры пользователя
+   */
+  static async getUserGames(userId) {
+    return prisma.userGame.findMany({
+      where: {
+        userId: parseInt(userId, 10)
+      },
+      include: {
+        game: true
+      },
+      orderBy: {
+        isFavorite: 'desc'
+      }
+    });
   }
 }
-
